@@ -6,9 +6,10 @@ export const templates: Template[] = [
     name: 'Reachout Message',
     message: `Hi {{firstName}},
 
-I came across your profile and was impressed by your experience at {{company}}. I'd love to connect and learn more about your journey.
+My name is Anish Hegde, and I’m MS CS graduate student from Northeastern University. As I navigate my own path toward the job market, I’d greatly value the opportunity to connect.
 
-Looking forward to connecting!`,
+Best regards,
+Anish Hegde `,
   },
   {
     id: 'referral',
