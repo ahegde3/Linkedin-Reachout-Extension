@@ -3,8 +3,9 @@ import type { ProfileData } from '../types'
 // LinkedIn DOM selectors for profile data extraction
 const SELECTORS = {
   // Profile page selectors
-  profileName: 'h1.text-heading-xlarge',
-  profileNameAlt: '.pv-text-details__left-panel h1',
+  profileName: 'h1.inline.t-24.v-align-middle.break-words',
+  profileNameAlt: 'h1.text-heading-xlarge',
+  profileNameFallback: '.pv-text-details__left-panel h1',
   currentCompany: '.pv-text-details__right-panel .inline-show-more-text',
   currentCompanyAlt: 'button[aria-label*="Current company"]',
   experienceSection: '#experience ~ .pvs-list__outer-container .pvs-entity__subtitle',
@@ -23,10 +24,13 @@ function extractFirstName(fullName: string): string {
 }
 
 function extractFromProfilePage(): ProfileData | null {
-  // Try primary selector for name
+  // Try selectors in order of priority
   let nameElement = document.querySelector(SELECTORS.profileName)
   if (!nameElement) {
     nameElement = document.querySelector(SELECTORS.profileNameAlt)
+  }
+  if (!nameElement) {
+    nameElement = document.querySelector(SELECTORS.profileNameFallback)
   }
   
   if (!nameElement) return null
