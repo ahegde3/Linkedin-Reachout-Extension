@@ -1,6 +1,7 @@
 // Content script entry point
 import { extractProfileData } from './nameExtractor'
 import { injectMessage } from './messageInjector'
+import { injectFloatingUI } from './floatingUI'
 import type { MessagePayload, MessageResponse } from '../types'
 
 // Listen for messages from popup
@@ -30,4 +31,7 @@ chrome.runtime.onMessage.addListener(
 
 // Log when content script loads
 console.log('LinkedIn Template Extension: Content script loaded')
+
+// Inject floating UI on LinkedIn pages
+injectFloatingUI()
 

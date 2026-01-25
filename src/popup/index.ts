@@ -72,7 +72,7 @@ function renderMainUI(): void {
           >
             <div class="template-btn-content">
               <span class="template-btn-name">${template.name}</span>
-              <span class="template-btn-desc">${template.id === 'reachout' ? 'Networking & introductions' : 'Job opportunity requests'}</span>
+              <span class="template-btn-desc">${template.description}</span>
             </div>
             <span class="template-btn-icon">✓</span>
           </button>
