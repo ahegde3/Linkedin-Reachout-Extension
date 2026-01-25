@@ -30,11 +30,11 @@ Resume: https://shorturl.at/uzV2x`,
     description: 'Referral Request',
     message: `Hi {{firstName}},
 
-      I hope this message finds you well! I noticed you work at {{company}} and I'm very interested in opportunities there.
+I hope this message finds you well! I noticed you work at {{company}} and I'm very interested in opportunities there.
 
-      Would you be open to a brief chat about your experience, or potentially referring me if there's a good fit?
+Would you be open to a brief chat about your experience, or potentially referring me if there's a good fit?
 
-      Thank you for your time!`,
+Thank you for your time!`,
   },
 ]
 
