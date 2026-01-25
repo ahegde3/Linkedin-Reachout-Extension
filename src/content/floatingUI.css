@@ -277,13 +277,13 @@
 .template-btn-icon {
   font-size: 18px;
   color: var(--linkedin-blue);
-  opacity: 0;
-  transition: opacity 0.15s ease;
+  opacity: 0.5;
+  transition: all 0.15s ease;
 }
 
-.template-btn.selected .template-btn-icon,
 .template-btn:hover .template-btn-icon {
   opacity: 1;
+  transform: translateX(4px);
 }
 
 /* Preview section */

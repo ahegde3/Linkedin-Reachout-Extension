@@ -10,14 +10,12 @@ import floatingStyles from './floatingUI.css?inline'
 interface FloatingUIState {
   isOpen: boolean
   profileData: ProfileData | null
-  selectedTemplateId: string | null
   statusMessage: { type: 'success' | 'error'; text: string } | null
 }
 
 const state: FloatingUIState = {
   isOpen: false,
   profileData: null,
-  selectedTemplateId: null,
   statusMessage: null,
 }
 
@@ -47,15 +45,7 @@ function createFloatingPanel(): HTMLElement {
 function renderPanelContent(): void {
   if (!panelElement) return
 
-  const { profileData, selectedTemplateId, statusMessage } = state
-
-  const selectedTemplate = templates.find(t => t.id === selectedTemplateId)
-  const previewMessage = selectedTemplate && profileData
-    ? fillTemplate(selectedTemplate.message, {
-        firstName: profileData.firstName,
-        company: profileData.company,
-      })
-    : ''
+  const { profileData, statusMessage } = state
 
   panelElement.innerHTML = `
     <div class="panel-container">
@@ -65,7 +55,7 @@ function renderPanelContent(): void {
           <div class="logo">in</div>
           <div class="header-text">
             <h1>Template Messages</h1>
-            <p>Quick personalized outreach</p>
+            <p>Click to insert</p>
           </div>
         </div>
         <button class="close-btn" id="close-panel-btn">
@@ -91,45 +81,25 @@ function renderPanelContent(): void {
               <span class="profile-name">${profileData.fullName || profileData.firstName}</span>
               <span class="profile-company">${profileData.company}</span>
             </div>
-            <div class="profile-status">
-              <span class="status-dot"></span>
-              <span>Profile detected</span>
-            </div>
           </div>
 
-          <!-- Template Selection -->
+          <!-- Template Selection - Click to Insert -->
           <div class="templates-section">
             <h2>Choose Template</h2>
             <div class="template-list">
               ${templates.map(template => `
                 <button 
-                  class="template-btn ${selectedTemplateId === template.id ? 'selected' : ''}" 
+                  class="template-btn" 
                   data-template-id="${template.id}"
                 >
                   <div class="template-btn-content">
                     <span class="template-btn-name">${template.name}</span>
                     <span class="template-btn-desc">${template.id === 'reachout' ? 'Networking & introductions' : 'Job opportunity requests'}</span>
                   </div>
-                  <span class="template-btn-icon">✓</span>
+                  <span class="template-btn-icon">→</span>
                 </button>
               `).join('')}
             </div>
-          </div>
-
-          <!-- Preview -->
-          ${selectedTemplate ? `
-            <div class="preview-section">
-              <h2>Preview</h2>
-              <div class="preview-box">${previewMessage}</div>
-            </div>
-          ` : ''}
-
-          <!-- Action Button -->
-          <div class="action-section">
-            <button class="send-btn" id="inject-btn" ${!selectedTemplateId ? 'disabled' : ''}>
-              <span>📝</span>
-              Insert Message
-            </button>
           </div>
 
           <!-- Status Message -->
@@ -155,29 +125,21 @@ function attachPanelEventListeners(): void {
     closeBtn.addEventListener('click', closePanel)
   }
 
-  // Template selection buttons
+  // Template buttons - click to inject immediately
   shadowRoot.querySelectorAll('.template-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const templateId = (btn as HTMLElement).dataset.templateId
       if (templateId) {
-        state.selectedTemplateId = templateId
-        state.statusMessage = null
-        renderPanelContent()
+        handleInjectMessage(templateId)
       }
     })
   })
-
-  // Inject button
-  const injectBtn = shadowRoot.getElementById('inject-btn')
-  if (injectBtn) {
-    injectBtn.addEventListener('click', handleInjectMessage)
-  }
 }
 
-function handleInjectMessage(): void {
-  if (!state.selectedTemplateId || !state.profileData) return
+function handleInjectMessage(templateId: string): void {
+  if (!state.profileData) return
 
-  const selectedTemplate = templates.find(t => t.id === state.selectedTemplateId)
+  const selectedTemplate = templates.find(t => t.id === templateId)
   if (!selectedTemplate) return
 
   const message = fillTemplate(selectedTemplate.message, {
@@ -188,17 +150,17 @@ function handleInjectMessage(): void {
   const result = injectMessage(message)
 
   if (result.success) {
-    state.statusMessage = { type: 'success', text: 'Message inserted successfully!' }
+    state.statusMessage = { type: 'success', text: 'Message inserted!' }
+    renderPanelContent()
     // Auto-close panel after successful injection
     setTimeout(() => {
       closePanel()
       state.statusMessage = null
-    }, 1500)
+    }, 800)
   } else {
     state.statusMessage = { type: 'error', text: 'Open a message thread or click "Connect" first' }
+    renderPanelContent()
   }
-
-  renderPanelContent()
 }
 
 function togglePanel(): void {

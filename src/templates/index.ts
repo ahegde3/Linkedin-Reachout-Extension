@@ -20,9 +20,9 @@ Anish Hegde `,
 
 I am a Fullstack developer who has worked with YC backed startups and have experience in working at their growth stage, building features. I am curious to learn more about your product and challenges that you are facing.
 
-    Thanks,
-    Anish
-    Resume: https://shorturl.at/uzV2x`,
+Thanks,
+Anish
+Resume: https://shorturl.at/uzV2x`,
   },
   {
     id: 'referral',
