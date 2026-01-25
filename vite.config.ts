@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, build } from 'vite'
 import { resolve } from 'path'
 import { copyFileSync, mkdirSync, existsSync, readFileSync, writeFileSync, rmSync } from 'fs'
 
@@ -6,8 +6,43 @@ import { copyFileSync, mkdirSync, existsSync, readFileSync, writeFileSync, rmSyn
 function chromeExtensionPlugin() {
   return {
     name: 'chrome-extension',
-    closeBundle() {
+    async closeBundle() {
       const distDir = resolve(__dirname, 'dist')
+      
+      // Build content script separately with IIFE format
+      await build({
+        configFile: false,
+        build: {
+          outDir: 'dist',
+          emptyOutDir: false,
+          lib: {
+            entry: resolve(__dirname, 'src/content/index.ts'),
+            name: 'content',
+            formats: ['iife'],
+            fileName: () => 'content.js',
+          },
+          rollupOptions: {
+            output: {
+              extend: true,
+            },
+          },
+        },
+      })
+      
+      // Build background script separately with IIFE format
+      await build({
+        configFile: false,
+        build: {
+          outDir: 'dist',
+          emptyOutDir: false,
+          lib: {
+            entry: resolve(__dirname, 'src/background/index.ts'),
+            name: 'background',
+            formats: ['iife'],
+            fileName: () => 'background.js',
+          },
+        },
+      })
       
       // Move popup.html from src/popup to root of dist and fix paths
       const srcPopup = resolve(distDir, 'src/popup/index.html')
@@ -20,6 +55,12 @@ function chromeExtensionPlugin() {
         writeFileSync(destPopup, htmlContent)
         // Clean up src directory
         rmSync(resolve(distDir, 'src'), { recursive: true, force: true })
+      }
+      
+      // Remove the index.js chunk file (not needed)
+      const indexJsPath = resolve(distDir, 'index.js')
+      if (existsSync(indexJsPath)) {
+        rmSync(indexJsPath)
       }
       
       // Copy manifest.json to dist
@@ -55,8 +96,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         popup: resolve(__dirname, 'src/popup/index.html'),
-        content: resolve(__dirname, 'src/content/index.ts'),
-        background: resolve(__dirname, 'src/background/index.ts'),
       },
       output: {
         entryFileNames: '[name].js',
