@@ -37,7 +37,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 9999;
+  z-index: 2147483647;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease;
   color: white;
@@ -69,7 +69,7 @@
   background: var(--bg-primary);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  z-index: 9998;
+  z-index: 2147483646;
   overflow: hidden;
   transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
 }
