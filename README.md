@@ -1,6 +1,6 @@
-# LinkedIn Template Extension
+# LetsReachout
 
-A Chrome extension that helps you send personalized template messages on LinkedIn. Auto-extracts recipient names and injects messages directly into LinkedIn's message composer.
+A Chrome extension that helps you send personalized template messages on LinkedIn. Auto-extracts recipient names and injects messages directly into LinkedIn's message composer based on specified templates.
 
 ## Features
 
@@ -83,6 +83,11 @@ linkedin-template-extension/
 - Vite
 - Tailwind CSS
 - Chrome Extension Manifest V3
+
+
+## Demo
+
+<video controls src="demo.mov" title="Title"></video>
 
 ## License
 
