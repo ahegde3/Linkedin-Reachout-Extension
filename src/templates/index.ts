@@ -18,11 +18,11 @@ Anish Hegde `,
     description: 'Startup Founder Reachout Message',
     message: `Hi {{firstName}},
 
-I am a Fullstack developer who has worked with YC backed startups and have experience in working at their growth stage, building features. I am curious to learn more about your product and challenges that you are facing.
+I am a Fullstack developer who has worked with YC backed startups and have experience in working in building with founding team. I am curious to learn more about your product and challenges that your team is facing.
 
 Thanks,
 Anish
-Resume: https://shorturl.at/uzV2x`,
+Resume: https://shorturl.at/0litl`,
   },
   {
     id: 'referral',
