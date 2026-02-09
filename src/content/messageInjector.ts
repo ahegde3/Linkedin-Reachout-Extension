@@ -1,15 +1,5 @@
 // LinkedIn message injection utilities
 
-const LOG_PREFIX = "[LI-DEBUG]";
-
-function log(...args: any[]) {
-  console.log(LOG_PREFIX, ...args);
-}
-
-function warn(...args: any[]) {
-  console.warn(LOG_PREFIX, ...args);
-}
-
 const SELECTORS = {
   // Messaging composer (multiple possible class names LinkedIn may use)
   messageComposer: ".msg-form__contenteditable",
@@ -46,8 +36,6 @@ function isVisible(element: HTMLElement): boolean {
     return true;
   }
 
-  // Debug why it's hidden
-  // log("Element considered hidden (no size):", element);
   return false;
 }
 
@@ -100,19 +88,14 @@ function fillTextarea(textarea: HTMLTextAreaElement, text: string): void {
 // UPDATED: Using isVisible on the element itself is safer than just display check.
 function isConnectionFieldUsable(el: HTMLElement): boolean {
   if (!el.isConnected) {
-    log("Element not connected:", el);
     return false;
   }
   const visible = isVisible(el);
-  if (!visible) {
-    log("Element not visible:", el);
-  }
   return visible;
 }
 
 function findVisibleElement<T extends HTMLElement>(selector: string, typeCheck?: (el: HTMLElement) => el is T): T | null {
   const elements = document.querySelectorAll<HTMLElement>(selector);
-  log(`Checking selector: ${selector}, found: ${elements.length}`);
   for (const el of elements) {
     if (typeCheck && !typeCheck(el)) continue;
     if (isConnectionFieldUsable(el)) return el as T;
@@ -141,26 +124,14 @@ function findAllElements<T extends HTMLElement>(
 }
 
 function findConnectionNoteField(): HTMLTextAreaElement | HTMLElement | null {
-  log("Finding connection note field...");
-  log("Context:", {
-    url: window.location.href,
-    isTop: window.self === window.top,
-    readyState: document.readyState,
-    bodyLength: document.body.innerHTML.length,
-    iframes: document.querySelectorAll('iframe').length,
-    shadowRoots: Array.from(document.querySelectorAll('*')).filter(el => el.shadowRoot).length
-  });
-
   // 1) Try LinkedIn's known "Add a note" textarea using robust iteration (Light DOM)
   const byId = findVisibleElement(SELECTORS.connectionNote, (el): el is HTMLTextAreaElement => el instanceof HTMLTextAreaElement);
   if (byId) {
-    log("Found via ID:", byId);
     return byId;
   }
 
   const byClass = findVisibleElement(SELECTORS.connectionNoteByClass, (el): el is HTMLTextAreaElement => el instanceof HTMLTextAreaElement);
   if (byClass) {
-    log("Found via Class:", byClass);
     return byClass;
   }
 
@@ -172,13 +143,11 @@ function findConnectionNoteField(): HTMLTextAreaElement | HTMLElement | null {
   });
 
   const dialogList = Array.from(dialogs);
-  log(`Found ${dialogList.length} potential dialogs`);
 
   for (const dialog of dialogList) {
     const textareas = dialog.querySelectorAll<HTMLTextAreaElement>("textarea");
     for (const textarea of textareas) {
       if (isConnectionFieldUsable(textarea)) {
-        log("Found textarea inside dialog:", dialog);
         return textarea;
       }
     }
@@ -202,44 +171,35 @@ function findConnectionNoteField(): HTMLTextAreaElement | HTMLElement | null {
         text.includes("message") ||
         text.includes("add")
       ) {
-        log("Found contenteditable inside dialog:", el);
         return el;
       }
     }
   }
 
   // 4) BRUTE FORCE with SHADOW DOM Support
-  log("Running brute force textarea search (Deep scan)...");
 
   // Predicate: is it a textarea?
   const isTextArea = (el: HTMLElement) => el.tagName === 'TEXTAREA';
 
   const allTextareas = findAllElements<HTMLTextAreaElement>(document, isTextArea);
-  log(`Found ${allTextareas.length} total textareas in deep scan`);
 
   for (const ta of allTextareas) {
     // Visibility check might fail if inside shadow DOM and we don't account for it, 
     // but basic offsetWidth usually works if the shadow host is visible.
-    // Let's log details of what we found
-    // log("Checking deep scan textarea:", ta);
     if (isConnectionFieldUsable(ta)) {
-      log("Found visible textarea via deep scan:", ta);
       return ta;
     }
   }
 
-  log("No connection note field found.");
   return null;
 }
 
 function findMessageComposer(): HTMLElement | null {
-  log("Finding message composer...");
 
   // 0) Check Active Element (User might have clicked it)
   if (document.activeElement instanceof HTMLElement) {
     const active = document.activeElement;
     if (active.isContentEditable || active.tagName === 'TEXTAREA' || active.tagName === 'INPUT') {
-      log("Found likely composer via activeElement:", active);
       // Optional: verify it looks like a message field? 
       // For now, if user is focused on it and asking to inject, assume it's the target.
       return active;
@@ -258,18 +218,15 @@ function findMessageComposer(): HTMLElement | null {
   const seen = new Set<HTMLElement>();
   for (const sel of selectors) {
     const list = document.querySelectorAll<HTMLElement>(sel);
-    log(`Checking selector: ${sel}, found: ${list.length}`);
     for (const el of list) {
       if (seen.has(el)) continue;
       seen.add(el);
       if (isVisible(el)) {
-        log("Found visible composer via selector:", sel, el);
         return el;
       }
     }
   }
   // Last resort: any contenteditable that looks like a message box (placeholder/aria)
-  log("Checking fallback contenteditable logic...");
   const anyEditable = document.querySelectorAll<HTMLElement>(
     '[contenteditable="true"]'
   );
@@ -285,11 +242,9 @@ function findMessageComposer(): HTMLElement | null {
       label.includes("write") ||
       label.includes("note")
     ) {
-      log("Found composer via fallback logic:", el);
       return el;
     }
   }
-  log("No message composer found.");
   return null;
 }
 
@@ -297,11 +252,9 @@ export function injectMessage(message: string): {
   success: boolean;
   context: string;
 } {
-  log("Starting injectMessage...");
   // First try connection note field (for connection requests)
   const connectionField = findConnectionNoteField();
   if (connectionField) {
-    log("Injecting into connection field", connectionField);
     if (connectionField instanceof HTMLTextAreaElement) {
       fillTextarea(connectionField, message);
     } else {
@@ -313,12 +266,10 @@ export function injectMessage(message: string): {
   // Then try message composer
   const composer = findMessageComposer();
   if (composer) {
-    log("Injecting into message composer", composer);
     simulateTyping(composer, message);
     return { success: true, context: "messaging" };
   }
 
-  warn("injectMessage failed: no field found");
   return { success: false, context: "none" };
 }
 
@@ -337,7 +288,6 @@ export function detectContext():
   });
 
   const visibleDialog = Array.from(allDialogs).find((d) => isVisible(d));
-  log("visibleDialog", visibleDialog);
   if (visibleDialog) {
     const modalText = visibleDialog.textContent?.toLowerCase() || "";
     if (
