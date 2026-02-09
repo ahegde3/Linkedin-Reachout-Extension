@@ -1,5 +1,5 @@
 {
-  "name": "linkedin-template-extension",
+  "name": "LetsReachout",
   "version": "1.0.0",
   "description": "Chrome extension for LinkedIn templated messages with auto name extraction",
   "type": "module",
