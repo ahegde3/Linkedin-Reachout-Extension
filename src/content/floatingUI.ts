@@ -3,7 +3,7 @@
 
 import { extractProfileData } from './nameExtractor'
 import { injectMessage } from './messageInjector'
-import { templates, fillTemplate } from '../templates'
+import { templates, fillTemplate, initializeTemplates } from '../templates'
 import type { ProfileData } from '../types'
 import floatingStyles from './floatingUI.css?inline'
 
@@ -94,7 +94,7 @@ function renderPanelContent(): void {
                 >
                   <div class="template-btn-content">
                     <span class="template-btn-name">${template.name}</span>
-                    <span class="template-btn-desc">${template.id === 'reachout' ? 'Networking & introductions' : 'Job opportunity requests'}</span>
+                    <span class="template-btn-desc">${template.description}</span>
                   </div>
                   <span class="template-btn-icon">→</span>
                 </button>
@@ -213,9 +213,12 @@ function handleOutsideClick(event: MouseEvent): void {
   }
 }
 
-export function injectFloatingUI(): void {
+export async function injectFloatingUI(): Promise<void> {
   // Don't inject if already present
   if (document.getElementById('linkedin-template-extension-root')) return
+
+  // Load templates from config
+  await initializeTemplates()
 
   // Create shadow DOM container
   const container = document.createElement('div')

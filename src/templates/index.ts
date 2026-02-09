@@ -1,46 +1,44 @@
 import type { Template } from '../types'
 
-export const templates: Template[] = [
-  {
-    id: 'General Reachout Message',
-    name: 'General Reachout Message',
-    description: 'Networking & introductions',
-    message: `Hi {{firstName}},
+let cachedTemplates: Template[] | null = null
 
-My name is Anish Hegde, and I’m MS CS graduate student from Northeastern University. As I navigate my own path toward the job market, I’d greatly value the opportunity to connect.
+export async function getTemplates(): Promise<Template[]> {
+  if (cachedTemplates) {
+    return cachedTemplates
+  }
 
-Best regards,
-Anish Hegde `,
-  },
-  {
-    id: 'Founder Reachout Message',
-    name: 'Founder Reachout Message',
-    description: 'Startup Founder Reachout Message',
-    message: `Hi {{firstName}},
+  try {
+    const response = await fetch(chrome.runtime.getURL('templates.json'))
+    const data = await response.json()
 
-I am a Fullstack developer who has worked with YC backed startups and have experience in working in building with founding team. I am curious to learn more about your product and challenges that your team is facing.
+    // Ensure each template has an ID if the JSON only contains {name, description, message}
+    let index = 0
+    cachedTemplates = data.map((t: any) => ({
+      id: `template-${index++}`,
+      name: t.name,
+      description: t.description,
+      message: t.message
+    }))
 
-Thanks,
-Anish
-Resume: https://shorturl.at/0litl`,
-  },
-  {
-    id: 'referral',
-    name: 'Referral Request',
-    description: 'Referral Request',
-    message: `Hi {{firstName}},
+    return cachedTemplates || []
+  } catch (error) {
+    console.error('Error loading templates:', error)
+    return []
+  }
+}
 
-I hope this message finds you well! I noticed you work at {{company}} and I'm very interested in opportunities there.
+// For synchronous access where async is not possible, we'll need to ensure loadTemplates was called first
+// or use the initial empty array
+export let templates: Template[] = []
 
-Would you be open to a brief chat about your experience, or potentially referring me if there's a good fit?
-
-Thank you for your time!`,
-  },
-]
+export async function initializeTemplates(): Promise<void> {
+  templates = await getTemplates()
+}
 
 export function fillTemplate(template: string, data: { firstName: string; company: string }): string {
   return template
     .replace(/\{\{firstName\}\}/g, data.firstName)
     .replace(/\{\{company\}\}/g, data.company)
 }
+
 

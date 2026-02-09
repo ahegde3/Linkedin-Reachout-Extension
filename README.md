@@ -73,13 +73,40 @@ linkedin-template-extension/
 │   │   ├── index.ts
 │   │   └── styles.css
 │   ├── background/        # Service worker
-│   ├── templates/         # Message templates
+│   ├── templates/         # Template logic & placeholder filling
 │   └── types/             # TypeScript types
 ├── public/
 │   ├── manifest.json      # Extension manifest
+│   ├── templates.json     # Configuration file for message templates
 │   └── icons/             # Extension icons
 └── dist/                  # Built extension (load this in Chrome)
 ```
+
+## Customizing Templates
+
+The extension loads message templates at runtime from a configuration file. You can easily add or modify templates without touching the source code.
+
+### How to update templates:
+
+1. Open `public/templates.json` in your editor.
+2. The file contains an array of template objects with the following structure:
+   ```json
+   {
+     "name": "Template Name",
+     "description": "Short description shown in the UI",
+     "message": "The actual message content with {{firstName}} and {{company}} placeholders"
+   }
+   ```
+3. After modification, rebuild the extension:
+   ```bash
+   npm run build
+   ```
+4. Reload the extension in `chrome://extensions/`.
+
+### Available Placeholders:
+- `{{firstName}}`: Automatically replaced with the recipient's first name.
+- `{{company}}`: Automatically replaced with the recipient's current company.
+
 
 ## Tech Stack
 
