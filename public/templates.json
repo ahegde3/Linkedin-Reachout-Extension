@@ -1,0 +1,17 @@
+[
+    {
+        "name": "General Reachout Message",
+        "description": "Networking & introductions",
+        "message": "Hi {{firstName}},\n\nMy name is Anish Hegde, and I’m MS CS graduate student from Northeastern University. As I navigate my own path toward the job market, I’d greatly value the opportunity to connect.\n\nBest regards,\nAnish Hegde"
+    },
+    {
+        "name": "Founder Reachout Message",
+        "description": "Startup Founder Reachout Message",
+        "message": "Hi {{firstName}},\n\nI am a Fullstack developer who has worked with YC backed startups and have experience in working in building with founding team. I am curious to learn more about your product and challenges that your team is facing.\n\nThanks,\nAnish\nResume: https://shorturl.at/0litl"
+    },
+    {
+        "name": "Referral Request",
+        "description": "Referral Request",
+        "message": "Hi {{firstName}},\n\nI hope this message finds you well! I noticed you work at {{company}} and I'm very interested in opportunities there.\n\nWould you be open to a brief chat about your experience, or potentially referring me if there's a good fit?\n\nThank you for your time!"
+    }
+]

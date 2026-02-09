@@ -1,4 +1,4 @@
-import { templates, fillTemplate } from '../templates'
+import { templates, fillTemplate, initializeTemplates } from '../templates'
 import type { ProfileData, MessageResponse } from '../types'
 
 console.log('[Popup] ======= POPUP JS LOADED =======')
@@ -189,6 +189,9 @@ async function handleInjectMessage(): Promise<void> {
 
 async function initialize(): Promise<void> {
   try {
+    // Load templates from config
+    await initializeTemplates()
+
     // Get current tab
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
 
