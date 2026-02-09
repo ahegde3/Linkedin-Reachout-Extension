@@ -19,6 +19,10 @@ A Chrome extension that helps you send personalized template messages on LinkedI
    ```
 
 2. Build the extension:
+
+
+
+
    ```bash
    npm run build
    ```
@@ -86,8 +90,7 @@ linkedin-template-extension/
 
 
 ## Demo
-
-<video controls src="demo.mov" title="Title"></video>
+https://github.com/user-attachments/assets/c70f106e-2902-4a53-b810-663e1559093b
 
 ## License
 
