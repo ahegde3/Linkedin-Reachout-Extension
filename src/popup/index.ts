@@ -1,12 +1,15 @@
 import { templates, fillTemplate } from '../templates'
 import type { ProfileData, MessageResponse } from '../types'
 
+console.log('[Popup] ======= POPUP JS LOADED =======')
+
 interface State {
   profileData: ProfileData | null
   selectedTemplateId: string | null
   isLoading: boolean
   error: string | null
   statusMessage: { type: 'success' | 'error'; text: string } | null
+  tabId: number | null
 }
 
 const state: State = {
@@ -15,6 +18,7 @@ const state: State = {
   isLoading: true,
   error: null,
   statusMessage: null,
+  tabId: null,
 }
 
 function getContentElement(): HTMLElement {
@@ -33,18 +37,18 @@ function renderNotOnLinkedIn(): void {
 
 function renderMainUI(): void {
   const { profileData, selectedTemplateId, statusMessage } = state
-  
+
   if (!profileData) {
     renderNotOnLinkedIn()
     return
   }
 
   const selectedTemplate = templates.find(t => t.id === selectedTemplateId)
-  const previewMessage = selectedTemplate 
+  const previewMessage = selectedTemplate
     ? fillTemplate(selectedTemplate.message, {
-        firstName: profileData.firstName,
-        company: profileData.company,
-      })
+      firstName: profileData.firstName,
+      company: profileData.company,
+    })
     : ''
 
   getContentElement().innerHTML = `
@@ -123,40 +127,60 @@ function attachEventListeners(): void {
 
   // Inject button
   const injectBtn = document.getElementById('inject-btn')
+  console.log('[Popup] Looking for inject-btn, found:', injectBtn)
   if (injectBtn) {
-    injectBtn.addEventListener('click', handleInjectMessage)
+    console.log('[Popup] Attaching click handler to inject-btn')
+    injectBtn.addEventListener('click', () => {
+      console.log('[Popup] ===== BUTTON CLICKED =====')
+      handleInjectMessage()
+    })
   }
 }
 
 async function handleInjectMessage(): Promise<void> {
-  if (!state.selectedTemplateId || !state.profileData) return
+  console.log('[Popup] handleInjectMessage called with state:', {
+    selectedTemplateId: state.selectedTemplateId,
+    hasProfileData: !!state.profileData,
+    tabId: state.tabId
+  })
+
+  if (!state.selectedTemplateId || !state.profileData || !state.tabId) {
+    console.log('[Popup] Early return - missing required state')
+    return
+  }
 
   const selectedTemplate = templates.find(t => t.id === state.selectedTemplateId)
-  if (!selectedTemplate) return
+  if (!selectedTemplate) {
+    console.log('[Popup] Early return - template not found')
+    return
+  }
 
   const message = fillTemplate(selectedTemplate.message, {
     firstName: state.profileData.firstName,
     company: state.profileData.company,
   })
 
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
-    if (!tab.id) throw new Error('No active tab')
+  console.log('[Popup] Message to inject:', message)
 
-    const response = await chrome.tabs.sendMessage(tab.id, {
+  try {
+    console.log('[Popup] Sending INJECT_MESSAGE to tab:', state.tabId)
+    const response = await chrome.tabs.sendMessage(state.tabId, {
       type: 'INJECT_MESSAGE',
       template: message,
     }) as MessageResponse
-
+    console.log('[Popup] Received response:', response)
     if (response.success) {
       state.statusMessage = { type: 'success', text: 'Message inserted successfully!' }
     } else {
       state.statusMessage = { type: 'error', text: response.error || 'Could not insert message' }
     }
   } catch (error) {
-    state.statusMessage = { 
-      type: 'error', 
-      text: 'Open a message thread or click "Connect" first' 
+    console.error('[Popup] ERROR sending message:', error)
+    console.error('[Popup] Error type:', typeof error)
+    console.error('[Popup] Error message:', (error as Error)?.message)
+    state.statusMessage = {
+      type: 'error',
+      text: `Error: ${(error as Error)?.message || 'Unknown error'}`
     }
   }
 
@@ -167,7 +191,7 @@ async function initialize(): Promise<void> {
   try {
     // Get current tab
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
-    
+
     // Check if we're on LinkedIn
     if (!tab.url?.includes('linkedin.com')) {
       state.isLoading = false
@@ -178,6 +202,9 @@ async function initialize(): Promise<void> {
     if (!tab.id) {
       throw new Error('No tab ID')
     }
+
+    // Store tab ID for later use
+    state.tabId = tab.id
 
     // Request profile data from content script
     const response = await chrome.tabs.sendMessage(tab.id, {
