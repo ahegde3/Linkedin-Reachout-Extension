@@ -7,24 +7,26 @@ import type { MessagePayload, MessageResponse } from '../types'
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener(
   (message: MessagePayload, _sender, sendResponse: (response: MessageResponse) => void) => {
+    console.log('[Extension] Received message:', message)
     if (message.type === 'GET_PROFILE_DATA') {
       const profileData = extractProfileData()
-      
+
       sendResponse({
         success: true,
         data: profileData,
       })
     }
-    
+
     if (message.type === 'INJECT_MESSAGE' && message.template) {
+      console.log('[Extension] Attempting to inject message:', message.template)
       const result = injectMessage(message.template)
-      
+      console.log('[Extension] Injection result:', result)
       sendResponse({
         success: result.success,
         error: result.success ? undefined : 'Could not find message input field',
       })
     }
-    
+
     return true // Keep channel open for async response
   }
 )
